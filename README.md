@@ -223,8 +223,8 @@ AgentShield/
 │
 ├── frontend/
 │   ├── index.html
-│   ├── app.js
-│   └── style.css
+│   ├── package.json
+│   └── src/
 │
 └── README.md
 Security Concept

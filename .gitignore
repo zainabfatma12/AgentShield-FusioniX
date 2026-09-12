@@ -4,3 +4,6 @@ __pycache__/
 agentshield.db
 .env
 backend/.env
+frontend/node_modules/
+frontend/dist/
+frontend/.env

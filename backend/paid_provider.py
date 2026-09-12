@@ -1,8 +1,7 @@
-import os
-
 from dotenv import load_dotenv
 from fastapi import FastAPI
 
+from backend.network import get_network_config
 from x402.http import (
     FacilitatorConfig,
     HTTPFacilitatorClient,
@@ -10,40 +9,23 @@ from x402.http import (
     RouteConfig,
 )
 from x402.http.middleware.fastapi import PaymentMiddlewareASGI
-from x402.mechanisms.evm.exact import ExactEvmServerScheme
+from x402.mechanisms.avm.exact import ExactAvmServerScheme
 from x402.server import x402ResourceServer
 
 load_dotenv()
 
 app = FastAPI(title="AgentShield x402 Protected Provider")
 
-PAY_TO = os.getenv("PAY_TO")
+config = get_network_config()
+PAY_TO = config["pay_to"]
 
-if not PAY_TO:
-    raise RuntimeError("PAY_TO is missing from .env")
-
-FACILITATOR_URL = os.getenv(
-    "FACILITATOR_URL",
-    "https://x402.org/facilitator"
-)
-
-NETWORK = "eip155:84532"
-
-# Connect to the x402 facilitator
 facilitator = HTTPFacilitatorClient(
-    FacilitatorConfig(url=FACILITATOR_URL)
+    FacilitatorConfig(url=config["facilitator"])
 )
 
-# Create x402 resource server
 server = x402ResourceServer(facilitator)
+server.register(config["caip2"], ExactAvmServerScheme())
 
-# Register EVM exact payment scheme
-server.register(
-    NETWORK,
-    ExactEvmServerScheme()
-)
-
-# Define the paid route
 routes = {
     "GET /paid-weather": RouteConfig(
         accepts=[
@@ -51,7 +33,7 @@ routes = {
                 scheme="exact",
                 pay_to=PAY_TO,
                 price="$0.001",
-                network=NETWORK,
+                network=config["caip2"],
             )
         ],
         mime_type="application/json",
@@ -59,7 +41,6 @@ routes = {
     )
 }
 
-# Protect the route with x402
 app.add_middleware(
     PaymentMiddlewareASGI,
     routes=routes,
@@ -73,6 +54,8 @@ async def root():
         "service": "Weather Intelligence API",
         "status": "online",
         "payment_protocol": "x402",
+        "network": config["label"],
+        "facilitator": config["facilitator"],
     }
 
 
@@ -85,5 +68,8 @@ async def paid_weather():
             "condition": "Partly Cloudy",
             "humidity": "72%",
         },
-        "message": "Premium weather intelligence delivered after x402 payment.",
+        "message": (
+            "Premium weather intelligence delivered after "
+            f"x402 settlement on {config['label']}."
+        ),
     }
