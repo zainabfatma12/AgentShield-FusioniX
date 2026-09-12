@@ -173,14 +173,14 @@ Serve `frontend/dist` as a static site.
 
 Vercel hosts the Vite React dashboard. The FastAPI backend is not a Vercel Python app — deploy it on a VPS or a Python PaaS (section 6) and point the UI at it.
 
-In the Vercel project:
+In the Vercel project settings:
 
-1. Connect the Git repo and deploy the branch that contains `frontend/package.json` (not an older vanilla `frontend/app.js` commit).
-2. Framework is already set in repo-root `vercel.json`: install/build under `frontend/`, output `frontend/dist`.
-3. Set the build env var `VITE_API_URL` to the public API URL (for example `https://api.example.com`).
-4. Do not set a Root Directory of `.` and leave Vercel to auto-detect Python. Root `requirements.txt` is for the API only.
+1. **Root Directory** = `frontend` (not `backend`, not `.`).
+2. **Framework Preset** = Vite.
+3. Clear any custom **Install Command** / **Build Command** overrides. `frontend/vercel.json` runs `npm run build` and outputs `dist`.
+4. Set the build env var `VITE_API_URL` to the public API URL (for example `https://api.example.com`).
 
-If Vercel still tries to parse `requirements.txt`, set **Framework Preset** to Vite and **Root Directory** to `frontend`. Then `vercel.json` is not required; `VITE_API_URL` still is.
+If Root Directory is left as `backend`, `npm install --prefix frontend` looks for `backend/frontend/package.json` and fails with `ENOENT`.
 
 `requirements.txt` must be UTF-8. A UTF-16 copy makes Vercel fail with `Failed to parse "requirements.txt"` and garbled content such as `��c`.
 
