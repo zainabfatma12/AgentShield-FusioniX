@@ -324,6 +324,7 @@ Authorization also rejects large amounts: even a trusted provider goes to `REVIE
 | API exits with `PAY_TO is required` | Missing receiver address | Set `PAY_TO` in the repo-root `.env` |
 | API exits with `ALGORAND_NETWORK must be...` | Missing or invalid network | Set `ALGORAND_NETWORK=testnet` or `mainnet` |
 | Dashboard says backend unavailable | Wrong `VITE_API_URL` or API not running | Section 2 and `/health` |
+| Analyze says not found / HTTP 404 on Windows or Vercel | UI is calling the Vercel site or localhost, not FastAPI | Set Vercel `VITE_API_URL` to the public API (`https://...`). On a Windows laptop run `python -m uvicorn backend.main:app --host 0.0.0.0 --port 8000` from the repo root, then point `VITE_API_URL` at that host — never the Vercel URL |
 | Browser blocks the request | HTTPS page calling HTTP API, or CORS | Use TLS on both, or keep both on HTTP for a lab |
 | Empty transaction history after restart | Ephemeral disk | Persist `agentshield.db` |
 | Analyze shows no score | x402 settlement failed (wallet, USDC opt-in, or balance) | Section 2 and `/payment/status` |

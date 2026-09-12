@@ -2,6 +2,7 @@ import { shortAddress } from "../lib/format.js";
 
 export default function Navbar({
   backendOnline,
+  apiUrl,
   walletAddress,
   walletBusy,
   onToggleWallet
@@ -33,6 +34,11 @@ export default function Navbar({
           className={`status-dot ${backendOnline ? "online" : "offline"}`}
         ></span>
         <span>{backendOnline ? "SYSTEM ONLINE" : "SYSTEM OFFLINE"}</span>
+        {backendOnline ? null : (
+          <span className="api-host" title={apiUrl}>
+            {String(apiUrl || "").replace(/^https?:\/\//, "")}
+          </span>
+        )}
       </div>
     </header>
   );

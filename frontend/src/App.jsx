@@ -224,8 +224,21 @@ export default function App() {
     document.body.classList.add("modal-open");
   }, []);
 
+  const requireBackend = useCallback(() => {
+    if (backendOnline) return true;
+    notify(
+      "Analysis not found",
+      `No AgentShield API at ${api.getApiUrl()}. ` +
+        "On Windows start FastAPI, then set VITE_API_URL to that URL " +
+        "(not the Vercel site).",
+      "error"
+    );
+    return false;
+  }, [backendOnline, notify]);
+
   const handleAnalyze = useCallback(
     async (provider) => {
+      if (!requireBackend()) return;
       setBusyId(provider.id);
       notify(
         "x402 payment",
@@ -266,11 +279,12 @@ export default function App() {
         setBusyId(null);
       }
     },
-    [analyzeProvider, notify, openModal]
+    [analyzeProvider, notify, openModal, requireBackend]
   );
 
   const handleUseService = useCallback(
     async (provider) => {
+      if (!requireBackend()) return;
       setBusyId(provider.id);
       notify(
         "x402 payment",
@@ -314,7 +328,7 @@ export default function App() {
         setBusyId(null);
       }
     },
-    [analyzeProvider, authorizeProvider, loadTransactions, notify, openModal]
+    [analyzeProvider, authorizeProvider, loadTransactions, notify, openModal, requireBackend]
   );
 
   const handleAuthorize = useCallback(async () => {
@@ -436,6 +450,7 @@ export default function App() {
 
       <Navbar
         backendOnline={backendOnline}
+        apiUrl={api.getApiUrl()}
         walletAddress={walletAddress}
         walletBusy={walletBusy}
         onToggleWallet={handleToggleWallet}
